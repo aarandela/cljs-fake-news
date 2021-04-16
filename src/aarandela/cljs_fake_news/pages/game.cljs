@@ -23,7 +23,7 @@
  (fn [db _]
    (let [{:keys [combined-news past-question-ids game-question-ids
                  num-of-questions question-num]} db]
-     (when (:< question-num num-of-questions)
+     (when (< question-num num-of-questions)
        (assoc db :news-on-deck (get-new-news {:all-news combined-news
                                               :all-ids game-question-ids
                                               :past-ids past-question-ids}))))))
@@ -33,9 +33,10 @@
  (fn [{:keys [db]} [_ _]]
    (let [{:keys [player-options num-of-questions question-num]} db]
      (if (or (= (:lives player-options) 0) 
-             (< question-num num-of-questions))
+             (>= question-num num-of-questions))
        {:db (assoc db :game-ended? true)}
-       {:dispatch [:new-news-on-deck]})))) ;; when time is working - dispatch set time effect
+       {:dispatch-n [[:new-news-on-deck]
+                     [:reset-timer]]}))))
 
 (rf/reg-event-fx
  ::verify-answer
@@ -48,16 +49,13 @@
                                                        :news-link (:url news-on-deck)
                                                        :thumbnail (:thumbnail news-on-deck)})
                         (update :past-question-ids conj (:id news-on-deck))
-                        (update :question-num inc))
-         time-start (-> db :player-options :time-start)]
+                        (update :question-num inc))]
      (if correct-answer?
        {:db (-> updated-db
-                (update :num-correct inc)
-                (update :time-left time-start))
-        :dispatch [:new-news-on-deck]} ;; when time is working - dispatch set time effect
+                (update :num-correct inc))
+        :dispatch [:check-game-over]} 
        {:db (-> updated-db
-                (update-in [:player-options :lives] dec)
-                (update :time-left time-start))
+                (update-in [:player-options :lives] dec))
         :dispatch [:check-game-over]}))))
 
 (rf/reg-event-fx
@@ -73,12 +71,18 @@
  (fn [db [_ set-time]]
    (update db :time-left dec set-time)))
 
+(rf/reg-event-db
+ :reset-timer
+ (fn [db [_ _]]
+   (let [time-start (-> db :player-options :time-start)]
+     (assoc db :time-left time-start))))
+
 (rf/reg-event-fx
  :check-time-left
  (fn [{:keys [db]} [_ _]]
-   (when (= (:time-left db) 0)
-     {:db (update-in db [:player-options :lives] dec)
-      :dispatch [:check-game-over]})))
+    (when (= (:time-left db) 0)
+      {:db (update-in db [:player-options :lives] dec)
+       :dispatch [:check-game-over]})))
    
 ;; -----------------------------------------------------------------------------
 ;; Subscriptions
