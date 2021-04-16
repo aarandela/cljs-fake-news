@@ -1,6 +1,6 @@
 # cljs-fake-news
 
-A [re-frame](https://github.com/day8/re-frame) application based on an [old project](https://github.com/aarandela/fake-news/tree/deploy) when I first started out. [Play the old version](aarandela.github.io/fake-news/)
+A [re-frame](https://github.com/day8/re-frame) application based on an [old project](https://github.com/aarandela/fake-news/tree/deploy) when I first started out. [Play the old version](https://aarandela.github.io/fake-news/)
 
 I wanted to rejuvenate this game in ClojureScript for more practice and add more features such as:
 
