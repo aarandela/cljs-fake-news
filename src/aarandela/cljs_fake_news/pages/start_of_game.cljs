@@ -42,7 +42,7 @@
      {:db (assoc db :real-news real-news)
       :dispatch-n [[:destroy-fetch-modal]
                    [::start-game]
-                   [:set-start-time time-start]]})))
+                   [:set-and-start-timer time-start]]})))
 
 (rf/reg-event-db
  ::start-game
@@ -68,11 +68,15 @@
      "medium"
      (-> db
          (assoc-in [:player-options :lives] 5)
-         (assoc-in [:player-options :time-start] 10))
+         (assoc-in [:player-options :time-start] 11))
      "hard"
      (-> db
          (assoc-in [:player-options :lives] 3)
-         (assoc-in [:player-options :time-start] 5)))))
+         (assoc-in [:player-options :time-start] 6))
+     "hardcore"
+     (-> db
+         (assoc-in [:player-options :lives] 1)
+         (assoc-in [:player-options :time-start] 4)))))
 
 ;; -----------------------------------------------------------------------------
 ;; Subscriptions
@@ -92,7 +96,8 @@
    [:select {:on-change #(rf/dispatch [::set-difficulty (-> % .-target .-value)])}
     [:option {:value "easy"} "Easy"]
     [:option {:value "medium"} "medium"]
-    [:option {:value "hard"} "hard"]]])
+    [:option {:value "hard"} "hard"]
+    [:option {:value "hardcore"} "hardcore"]]])
 
 (defn StartGameButton
   []

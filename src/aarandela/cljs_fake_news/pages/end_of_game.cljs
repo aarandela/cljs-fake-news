@@ -7,7 +7,13 @@
 ;; -----------------------------------------------------------------------------
 ;; Events
 
-
+(rf/reg-event-fx
+ ::restart-game
+ (fn [{:keys [db]} [_ _]]
+   {:db (-> db
+            (assoc :game-started? false)
+            (assoc :game-ended? false)
+            (assoc :game-question-ids []))}))
 
 
 ;; -----------------------------------------------------------------------------
@@ -18,6 +24,12 @@
 ;; -----------------------------------------------------------------------------
 ;; Views
 
+
+(defn RestartGameButton
+  []
+  [:button.button.is-success {:on-click #(rf/dispatch [::restart-game])}
+   "Restart Game"])
+
 (defn EndOfGameContainer []
   [:section.section
-    "End of game"])
+    [RestartGameButton]])

@@ -22,10 +22,19 @@
     #(rf/dispatch (conj success-action %))
     #(rf/dispatch (conj error-action %)))))
 
+(defonce one-second-interval (js/setInterval (fn []
+                                               (rf/dispatch [:countdown])
+                                               (rf/dispatch [:check-time-left])) 
+                                        1000))
+
 (rf/reg-fx
- :start-countdown
- (fn [_]
-   (js/setInterval (fn []
-                     (rf/dispatch [:countdown])
-                     (rf/dispatch [:check-time-left]))
-                   1000)))
+ :interval
+ (fn [{:keys [action]}]
+   (when (= action :start-countdown) 
+     one-second-interval)))
+
+(rf/reg-fx
+ :cancel-interval
+ (fn [{:keys [action]}]
+   (when (= action :cancel-countdown) 
+     (js/clearInterval one-second-interval))))

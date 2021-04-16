@@ -35,6 +35,7 @@
      (if (or (= (:lives player-options) 0) 
              (>= question-num num-of-questions))
        {:db (assoc db :game-ended? true)}
+        ;; :cancel-interval {:action :cancel-countdown}}
        {:dispatch-n [[:new-news-on-deck]
                      [:reset-timer]]}))))
 
@@ -59,12 +60,14 @@
         :dispatch [:check-game-over]}))))
 
 (rf/reg-event-fx
- :set-start-time
+ :set-and-start-timer
  (fn [{:keys [db]} [_ set-time]]
    {:db (-> db
             (assoc-in [:player-options :time-start] set-time)
             (assoc :time-left set-time))
-    :start-countdown nil}))
+    :interval {:action :start-countdown
+              ;;  :event [:countdown]
+               :frequency-in-ms 1000}}))
 
 (rf/reg-event-db
  :countdown
