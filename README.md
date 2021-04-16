@@ -7,8 +7,11 @@ I wanted to rejuvenate this game in ClojureScript for more practice and add more
 - Time Limit
 - Difficulty 
 - Show the articles of the news
+- Improve game logic
 - Possibly multiplayer and/or high score table
 - Clean up the UI
+
+I've always come into projects when they are built, but never really started from the ground up. I also wanted to get more practice in starting an application in Clojure/ClojureScript land.
 
 ## Getting Started
 
