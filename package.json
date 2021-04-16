@@ -1,0 +1,17 @@
+{
+	"name": "cljs-fake-news",
+	"scripts": {
+		"start": "npm install && npm run watch",
+		"watch": "npx shadow-cljs watch app browser-test karma-test",
+		"release": "npx shadow-cljs release app",
+		"build-report": "npx shadow-cljs run shadow.cljs.build-report app target/build-report.html"
+	},
+	"devDependencies": {
+		"shadow-cljs": "2.12.1"
+	},
+	"dependencies": {
+		"highlight.js": "10.7.1",
+		"react": "17.0.1",
+		"react-dom": "17.0.1"
+	}
+}
