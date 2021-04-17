@@ -11,7 +11,7 @@
  :fetch-all-news
  (fn [{:keys [db]} _]
    {:db (assoc db :modal {:type "GET_READY"
-                          :msg "Loading news..."})
+                          :msg "Get Ready! Loading news..."})
     :fetch-onion {:url "https://www.reddit.com/r/TheOnion/.json?limit=100"
                   :method :get
                   :success-action [::fetch-success]
@@ -63,25 +63,37 @@
    (case difficulty
      "easy"
      (-> db
-         (assoc-in [:player-options :lives] 10)
+         (assoc-in [:player-options :start-lives] 10)
+         (assoc-in [:player-options :lives-left] 10)
          (assoc-in [:player-options :time-start] 20))
+     "dev"
+     (-> db
+         (assoc-in [:player-options :start-lives] 9999)
+         (assoc-in [:player-options :lives-left] 9999)
+         (assoc-in [:player-options :time-start] 9999))
      "medium"
      (-> db
-         (assoc-in [:player-options :lives] 5)
+         (assoc-in [:player-options :start-lives] 5)
+         (assoc-in [:player-options :lives-left] 5)
          (assoc-in [:player-options :time-start] 11))
      "hard"
      (-> db
-         (assoc-in [:player-options :lives] 3)
+         (assoc-in [:player-options :start-lives] 3)
+         (assoc-in [:player-options :lives-left] 3)
          (assoc-in [:player-options :time-start] 6))
      "hardcore"
      (-> db
-         (assoc-in [:player-options :lives] 1)
+         (assoc-in [:player-options :start-lives] 1)
+         (assoc-in [:player-options :lives-left] 1)
          (assoc-in [:player-options :time-start] 4)))))
 
 ;; -----------------------------------------------------------------------------
 ;; Subscriptions
 
-
+(rf/reg-sub
+ :player-options
+ (fn [db]
+   (:player-options db)))
 
 ;; -----------------------------------------------------------------------------
 ;; Views
@@ -94,6 +106,8 @@
   [:div
    [:label "Choose Difficulty"]
    [:select {:on-change #(rf/dispatch [::set-difficulty (-> % .-target .-value)])}
+    [:option {:value ""} "-- Select a Difficulty --"]
+    [:option {:value "dev"} "dev mode"]
     [:option {:value "easy"} "Easy"]
     [:option {:value "medium"} "medium"]
     [:option {:value "hard"} "hard"]
@@ -101,8 +115,11 @@
 
 (defn StartGameButton
   []
-  [:button.button.is-info {:on-click #(rf/dispatch [:fetch-all-news])}
-   "Start Game"])
+  (let [player-options @(rf/subscribe [:player-options])]
+    [:button.button.is-info {:disabled (when-not player-options
+                                         "true")
+                             :on-click #(rf/dispatch [:fetch-all-news])}
+     "Start Game"]))
 
 (defn StartOfGameContainer []
   [:section.section

@@ -96,5 +96,8 @@ TODO:
 
 - [] Stop timer when game ends
 - [] Clean up UI
-- [] Add Past News section
+- [x] Add Past News section
+- [x] lives section
+- [x] show time
+- [] End game should not refresh, so questions shouldn't be duplicated
 - [] WebRTC?

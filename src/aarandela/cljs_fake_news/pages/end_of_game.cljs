@@ -7,13 +7,13 @@
 ;; -----------------------------------------------------------------------------
 ;; Events
 
-(rf/reg-event-fx
- ::restart-game
- (fn [{:keys [db]} [_ _]]
-   {:db (-> db
-            (assoc :game-started? false)
-            (assoc :game-ended? false)
-            (assoc :game-question-ids []))}))
+;; (rf/reg-event-fx
+;;  ::restart-game
+;;  (fn [{:keys [db]} [_ _]]
+;;    {:db (-> db
+;;             (assoc :game-started? false)
+;;             (assoc :game-ended? false)
+;;             (assoc :game-question-ids []))}))
 
 
 ;; -----------------------------------------------------------------------------
@@ -27,7 +27,9 @@
 
 (defn RestartGameButton
   []
-  [:button.button.is-success {:on-click #(rf/dispatch [::restart-game])}
+  [:button.button.is-success {:on-click #((-> js/document
+                                              (. -location)
+                                              (. (reload))))} ;; FIXME: dont refresh
    "Restart Game"])
 
 (defn EndOfGameContainer []

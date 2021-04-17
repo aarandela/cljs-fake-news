@@ -1,7 +1,9 @@
 (ns aarandela.cljs-fake-news.pages.game
   (:require
+   [aarandela.cljs-fake-news.components.modal :refer [Modal]]
    [aarandela.cljs-fake-news.components.multiplayer :refer [MultiplayerContainer]]
    [aarandela.cljs-fake-news.components.past-news :refer [PastNewsContainer]]
+
    [clojure.string :as string]
    [re-frame.core :as rf]
    [taoensso.timbre :as timbre]))
@@ -32,10 +34,10 @@
  :check-game-over
  (fn [{:keys [db]} [_ _]]
    (let [{:keys [player-options num-of-questions question-num]} db]
-     (if (or (= (:lives player-options) 0) 
+     (if (or (= (:lives-left player-options) 0) 
              (>= question-num num-of-questions))
-       {:db (assoc db :game-ended? true)}
-        ;; :cancel-interval {:action :cancel-countdown}}
+       {:db (assoc db :game-ended? true)
+        :cancel-interval {:action :cancel-countdown}}
        {:dispatch-n [[:new-news-on-deck]
                      [:reset-timer]]}))))
 
@@ -48,7 +50,9 @@
          updated-db (-> db
                         (update :past-news-links conj {:question-num (:question-num db)
                                                        :news-link (:url news-on-deck)
-                                                       :thumbnail (:thumbnail news-on-deck)})
+                                                       :thumbnail (:thumbnail news-on-deck)
+                                                       :title (:title news-on-deck)
+                                                       :correct? correct-answer?})
                         (update :past-question-ids conj (:id news-on-deck))
                         (update :question-num inc))]
      (if correct-answer?
@@ -56,7 +60,7 @@
                 (update :num-correct inc))
         :dispatch [:check-game-over]} 
        {:db (-> updated-db
-                (update-in [:player-options :lives] dec))
+                (update-in [:player-options :lives-left] dec))
         :dispatch [:check-game-over]}))))
 
 (rf/reg-event-fx
@@ -65,9 +69,7 @@
    {:db (-> db
             (assoc-in [:player-options :time-start] set-time)
             (assoc :time-left set-time))
-    :interval {:action :start-countdown
-              ;;  :event [:countdown]
-               :frequency-in-ms 1000}}))
+    :interval {:action :start-countdown}}))
 
 (rf/reg-event-db
  :countdown
@@ -84,7 +86,14 @@
  :check-time-left
  (fn [{:keys [db]} [_ _]]
     (when (= (:time-left db) 0)
-      {:db (update-in db [:player-options :lives] dec)
+      {:db (-> db
+              (update :past-news-links conj {:question-num (:question-num db)
+                                              :news-link (-> db :new-news-on-deck :url)
+                                              :thumbnail (-> db :news-on-deck :thumbnail)
+                                              :title (-> db :news-on-deck :title)
+                                              :correct? false})
+              (update :question-num inc)
+              (update-in [:player-options :lives-left] dec))
        :dispatch [:check-game-over]})))
    
 ;; -----------------------------------------------------------------------------
@@ -105,6 +114,11 @@
  (fn [db _]
    (-> db :player-options :time-start)))
 
+(rf/reg-sub
+ :lives-left
+ (fn [db _]
+   (-> db :player-options :lives-left)))
+
 
 ;; -----------------------------------------------------------------------------
 ;; Views
@@ -116,12 +130,18 @@
      [:h1.subtitle.is-2.has-text-centered
       title]]))
 
+(def seconds-left 5)
+
 (defn TimeBarContainer []
   (let [time-left @(rf/subscribe [::time-left])
         time-start @(rf/subscribe [::time-start])]
     [:section.section
-     [:progress.progress.is-primary {:value time-left
-                                     :max time-start}]]))
+     [:div "TIME LEFT: " time-left]
+     [:progress.progress {:class (if (<= time-left seconds-left)
+                                   "is-danger"
+                                   "is-primary")
+                          :value time-left
+                          :max time-start}]]))
 
 (defn GameButtonsContainer []
   [:div.column
@@ -133,11 +153,19 @@
      [:button.button.is-success.is-large {:on-click #(rf/dispatch [::verify-answer "nottheonion"])}
       "REAL NEWS!"]]]])
 
+(defn LivesContainer []
+  (let [lives-left @(rf/subscribe [:lives-left])]
+    [:div "LIVES LEFT: " lives-left]))
+
 (defn TheGameContainer []
-  [:section.section
-   [NewsTitleContainer]
-   [TimeBarContainer]
-   [:div.columns.is-centered
-    [PastNewsContainer]
-    [GameButtonsContainer]
-    [MultiplayerContainer]]])
+  [:<>
+   [Modal]
+   [:section.section
+    [NewsTitleContainer]
+    [TimeBarContainer]
+    [:div.columns.is-centered
+     [PastNewsContainer]
+     [:div
+      [GameButtonsContainer]
+      [LivesContainer]]
+     [MultiplayerContainer]]]])

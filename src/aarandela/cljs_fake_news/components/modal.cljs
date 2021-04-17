@@ -63,8 +63,7 @@
 (defmethod ModalInternal "GET_READY"
   [{:keys [msg type]}]
   [:<>
-   
-   [:div.modal (when type
+   [:div.modal (when msg
                  {:class "is-active"})
     [:div.modal-background]
     [:div.modal-content

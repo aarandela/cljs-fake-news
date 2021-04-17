@@ -24,9 +24,8 @@
              :title-question nil
              :game-ended? false
              :game-started? false
-             :time-left 10
-             :player-options {:lives 3
-                              :time-start 10}
+             :time-left 9999
+             :player-options nil
              :num-correct 0
              :question-num 1
              :past-news-links [])))
@@ -65,12 +64,12 @@
      (cond
 
        (and (not game-started?) (not game-ended?))
-       [StartOfGameContainer]
-       
-       (and game-started? (not game-ended?))
        [:<>
         [Modal]
-        [TheGameContainer]]
+        [StartOfGameContainer]]
+       
+       (and game-started? (not game-ended?))
+       [TheGameContainer]
        
        (and game-started? game-ended?)
        [EndOfGameContainer]
