@@ -99,5 +99,10 @@ TODO:
 - [x] Add Past News section
 - [x] lives section
 - [x] show time
+- [] show past news component in end game page
 - [] End game should not refresh, so questions shouldn't be duplicated
+- [] ajax calls concurrent
+- [] fix modal
+- [] goals
+- [] gifs?
 - [] WebRTC?

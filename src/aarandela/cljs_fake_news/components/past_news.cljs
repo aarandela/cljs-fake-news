@@ -28,10 +28,10 @@
   [:tr {:key idx}
    [:td question-num]
    [:td [:img {:src thumbnail}]]
-   [:td [:a {:href news-link} title]]
+   [:td [:a {:href news-link :target "_blank"} title]]
    [:td (if correct?
-          [:i.fas.fa-check {:style {:color "green"}} "yes"]
-          [:i.fas.fa-times {:style {:color "red"}} "No"])]])
+          [:span.icon [:i.fas.fa-check {:style {:color "green"}}]]
+          [:span.icon [:i.fas.fa-times {:style {:color "red"}}]])]])
 
 
 (defn PastNewsTable []

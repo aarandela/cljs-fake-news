@@ -23,7 +23,7 @@
  (fn [{:keys [db]} [_ response]]
    (let [fake-news (->> (get-in response [:data :children])
                         (map #(:data %))
-                        (filter #(:subreddit %)))
+                        (filter #(:subreddit %))) ;; possible dirty data where subreddit was nil
          fake-news (zipmap (map :id fake-news) fake-news)]
      {:db (assoc db :fake-news fake-news)
       :fetch-not-the-onion {:url "https://www.reddit.com/r/nottheonion/.json?limit=100"
@@ -36,7 +36,7 @@
  (fn [{:keys [db]} [_ response]]
    (let [real-news (->> (get-in response [:data :children])
                         (map #(:data %))
-                        (filter #(:subreddit %)))
+                        (filter #(:subreddit %))) 
          real-news (zipmap (map :id real-news) real-news)
          time-start (get-in db [:player-options :time-start])]
      {:db (assoc db :real-news real-news)
@@ -65,27 +65,34 @@
      (-> db
          (assoc-in [:player-options :start-lives] 10)
          (assoc-in [:player-options :lives-left] 10)
-         (assoc-in [:player-options :time-start] 20))
+         (assoc-in [:player-options :time-start] 20)
+         (assoc-in [:player-options :goal-to-win] 20))
      "dev"
      (-> db
          (assoc-in [:player-options :start-lives] 9999)
          (assoc-in [:player-options :lives-left] 9999)
-         (assoc-in [:player-options :time-start] 9999))
+         (assoc-in [:player-options :time-start] 9999)
+         (assoc-in [:player-options :goal-to-win] 5))
      "medium"
      (-> db
          (assoc-in [:player-options :start-lives] 5)
          (assoc-in [:player-options :lives-left] 5)
-         (assoc-in [:player-options :time-start] 11))
+         (assoc-in [:player-options :time-start] 11)
+         (assoc-in [:player-options :goal-to-win] 15))
+         
      "hard"
      (-> db
          (assoc-in [:player-options :start-lives] 3)
          (assoc-in [:player-options :lives-left] 3)
-         (assoc-in [:player-options :time-start] 6))
+         (assoc-in [:player-options :time-start] 6)
+         (assoc-in [:player-options :goal-to-win] 15))
      "hardcore"
      (-> db
          (assoc-in [:player-options :start-lives] 1)
          (assoc-in [:player-options :lives-left] 1)
-         (assoc-in [:player-options :time-start] 4)))))
+         (assoc-in [:player-options :time-start] 4)
+         (assoc-in [:player-options :goal-to-win] 15)))))
+         
 
 ;; -----------------------------------------------------------------------------
 ;; Subscriptions
