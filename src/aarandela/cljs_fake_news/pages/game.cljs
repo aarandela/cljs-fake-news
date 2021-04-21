@@ -38,8 +38,8 @@
              (>= question-num num-of-questions))
        {:db (assoc db :game-ended? true)
         :cancel-interval {:action :cancel-countdown}}
-       {:dispatch-n [[:new-news-on-deck]
-                     [:reset-timer]]}))))
+       {:fx [[:dispatch [:new-news-on-deck]]
+             [:dispatch [:reset-timer]]]}))))
 
 (rf/reg-event-fx
  ::verify-answer
@@ -119,6 +119,15 @@
  (fn [db _]
    (-> db :player-options :lives-left)))
 
+(rf/reg-sub
+ :goal-to-win
+ (fn [db _]
+   (let [goal (-> db :player-options :goal-to-win)
+         correct-amt (->> db
+                          :past-news-links
+                          (filter :correct?)
+                          count)]
+     (- goal correct-amt))))
 
 ;; -----------------------------------------------------------------------------
 ;; Views
@@ -148,14 +157,21 @@
    [:div.columns
     [:div.column
      [:button.button.is-warning.is-large {:on-click #(rf/dispatch [::verify-answer "TheOnion"])}
-      "ThIs nEwS Is FaKe!"]]
+      "FAKE FAKE FAKE!"]]
     [:div.column
      [:button.button.is-success.is-large {:on-click #(rf/dispatch [::verify-answer "nottheonion"])}
       "REAL NEWS!"]]]])
 
 (defn LivesContainer []
   (let [lives-left @(rf/subscribe [:lives-left])]
-    [:div "LIVES LEFT: " lives-left]))
+    [:<> 
+     [:div "LIVES LEFT: " lives-left]
+     [:i.fas.fa-heart {:style {:color "red"}}]]))
+
+(defn GoalsContainer []
+  (let [goal-to-win @(rf/subscribe [:goal-to-win])]
+    [:<>
+      [:div "Goal to win:" goal-to-win]]))
 
 (defn TheGameContainer []
   [:<>
@@ -167,5 +183,6 @@
      [PastNewsContainer]
      [:div
       [GameButtonsContainer]
-      [LivesContainer]]
+      [LivesContainer]
+      [GoalsContainer]]
      [MultiplayerContainer]]]])

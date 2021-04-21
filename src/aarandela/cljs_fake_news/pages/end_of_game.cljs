@@ -1,5 +1,7 @@
 (ns aarandela.cljs-fake-news.pages.end-of-game
   (:require
+   [aarandela.cljs-fake-news.components.past-news :refer [PastNewsContainer]]
+
    [re-frame.core :as rf]
    [taoensso.timbre :as timbre]))
 
@@ -34,4 +36,5 @@
 
 (defn EndOfGameContainer []
   [:section.section
-    [RestartGameButton]])
+    [RestartGameButton]
+    [PastNewsContainer]])

@@ -40,9 +40,9 @@
          real-news (zipmap (map :id real-news) real-news)
          time-start (get-in db [:player-options :time-start])]
      {:db (assoc db :real-news real-news)
-      :dispatch-n [[:destroy-fetch-modal]
-                   [::start-game]
-                   [:set-and-start-timer time-start]]})))
+      :fx [[:dispatch [:destroy-fetch-modal]]
+           [:dispatch [::start-game]]
+           [:dispatch [:set-and-start-timer time-start]]]})))
 
 (rf/reg-event-db
  ::start-game
@@ -69,9 +69,9 @@
          (assoc-in [:player-options :goal-to-win] 20))
      "dev"
      (-> db
-         (assoc-in [:player-options :start-lives] 9999)
-         (assoc-in [:player-options :lives-left] 9999)
-         (assoc-in [:player-options :time-start] 9999)
+         (assoc-in [:player-options :start-lives] 100)
+         (assoc-in [:player-options :lives-left] 100)
+         (assoc-in [:player-options :time-start] 100)
          (assoc-in [:player-options :goal-to-win] 5))
      "medium"
      (-> db
@@ -124,7 +124,7 @@
   []
   (let [player-options @(rf/subscribe [:player-options])]
     [:button.button.is-info {:disabled (when-not player-options
-                                         "true")
+                                         true)
                              :on-click #(rf/dispatch [:fetch-all-news])}
      "Start Game"]))
 
