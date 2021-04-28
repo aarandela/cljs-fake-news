@@ -63,35 +63,29 @@
    (case difficulty
      "easy"
      (-> db
-         (assoc-in [:player-options :start-lives] 10)
-         (assoc-in [:player-options :lives-left] 10)
+         (assoc-in [:player-options :start-lives] 8)
+         (assoc-in [:player-options :lives-left] 8)
          (assoc-in [:player-options :time-start] 20)
-         (assoc-in [:player-options :goal-to-win] 20))
-     "dev"
-     (-> db
-         (assoc-in [:player-options :start-lives] 100)
-         (assoc-in [:player-options :lives-left] 100)
-         (assoc-in [:player-options :time-start] 100)
-         (assoc-in [:player-options :goal-to-win] 5))
+         (assoc-in [:player-options :goal-to-win] 8))
      "medium"
      (-> db
          (assoc-in [:player-options :start-lives] 5)
          (assoc-in [:player-options :lives-left] 5)
          (assoc-in [:player-options :time-start] 11)
-         (assoc-in [:player-options :goal-to-win] 15))
+         (assoc-in [:player-options :goal-to-win] 14))
          
      "hard"
      (-> db
          (assoc-in [:player-options :start-lives] 3)
          (assoc-in [:player-options :lives-left] 3)
          (assoc-in [:player-options :time-start] 6)
-         (assoc-in [:player-options :goal-to-win] 15))
+         (assoc-in [:player-options :goal-to-win] 14))
      "hardcore"
      (-> db
          (assoc-in [:player-options :start-lives] 1)
          (assoc-in [:player-options :lives-left] 1)
          (assoc-in [:player-options :time-start] 4)
-         (assoc-in [:player-options :goal-to-win] 15)))))
+         (assoc-in [:player-options :goal-to-win] 14)))))
          
 
 ;; -----------------------------------------------------------------------------
@@ -114,7 +108,6 @@
    [:label "Choose Difficulty"]
    [:select {:on-change #(rf/dispatch [::set-difficulty (-> % .-target .-value)])}
     [:option {:value ""} "-- Select a Difficulty --"]
-    [:option {:value "dev"} "dev mode"]
     [:option {:value "easy"} "Easy"]
     [:option {:value "medium"} "medium"]
     [:option {:value "hard"} "hard"]

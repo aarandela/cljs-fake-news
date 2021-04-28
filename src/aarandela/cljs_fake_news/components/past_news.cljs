@@ -41,7 +41,6 @@
       (map-indexed #(PastNewsRow %1 %2) news-links)]]))
 
 (defn PastNewsContainer []
-  [:<> 
-   [:div.column
-    "Past News"
-    [PastNewsTable]]])
+  [:div.column
+    [:h1.subtitle.has-text-centered "Past News"]
+    [PastNewsTable]])

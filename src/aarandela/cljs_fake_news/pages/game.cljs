@@ -33,10 +33,13 @@
 (rf/reg-event-fx
  :check-game-over
  (fn [{:keys [db]} [_ _]]
-   (let [{:keys [player-options num-of-questions question-num]} db]
+   (let [{:keys [player-options num-of-questions question-num num-correct]} db]
      (if (or (= (:lives-left player-options) 0) 
-             (>= question-num num-of-questions))
-       {:db (assoc db :game-ended? true)
+             (>= question-num num-of-questions)
+             (= (:goal-to-win player-options) num-correct))
+       {:db (-> db 
+                (assoc :game-ended? true)
+                (assoc :winner? (= (:goal-to-win player-options) num-correct)))
         :cancel-interval {:action :cancel-countdown}}
        {:fx [[:dispatch [:new-news-on-deck]]
              [:dispatch [:reset-timer]]]}))))
@@ -110,9 +113,19 @@
    (:time-left db)))
 
 (rf/reg-sub
+ :num-correct
+ (fn [db _]
+   (:num-correct db)))
+
+(rf/reg-sub
  ::time-start
  (fn [db _]
    (-> db :player-options :time-start)))
+
+(rf/reg-sub
+ :start-lives
+ (fn [db _]
+   (-> db :player-options :start-lives)))
 
 (rf/reg-sub
  :lives-left
@@ -128,6 +141,11 @@
                           (filter :correct?)
                           count)]
      (- goal correct-amt))))
+
+(rf/reg-sub
+ :set-goal
+ (fn [db _]
+   (-> db :player-options :goal-to-win)))
 
 ;; -----------------------------------------------------------------------------
 ;; Views
@@ -145,7 +163,6 @@
   (let [time-left @(rf/subscribe [::time-left])
         time-start @(rf/subscribe [::time-start])]
     [:section.section
-     [:div "TIME LEFT: " time-left]
      [:progress.progress {:class (if (<= time-left seconds-left)
                                    "is-danger"
                                    "is-primary")
@@ -163,15 +180,27 @@
       "REAL NEWS!"]]]])
 
 (defn LivesContainer []
-  (let [lives-left @(rf/subscribe [:lives-left])]
-    [:<> 
-     [:div "LIVES LEFT: " lives-left]
-     [:i.fas.fa-heart {:style {:color "red"}}]]))
+  (let [lives-left @(rf/subscribe [:lives-left])
+        start-lives @(rf/subscribe [:start-lives])]
+    [:div.has-text-centered {:style {:padding "2rem"}}
+     [:h1.title "Lives Left: " lives-left "/" start-lives]
+     (take lives-left 
+           (repeat [:i.fas.fa-heart {:style {:color "red"
+                                             :font-size "3rem"}}]))]))
 
 (defn GoalsContainer []
-  (let [goal-to-win @(rf/subscribe [:goal-to-win])]
-    [:<>
-      [:div "Goal to win:" goal-to-win]]))
+  (let [goal-to-win @(rf/subscribe [:goal-to-win])
+        num-correct @(rf/subscribe [:num-correct])
+        set-goal @(rf/subscribe [:set-goal])]
+    [:div.has-text-centered {:style {:padding "3rem"
+                                     :max-width "fit-content"}}
+      [:h1.title "# correct to win: "num-correct"/"set-goal]
+      (take num-correct
+            (repeat [:i.far.fa-check-circle {:style {:color "green"
+                                                     :font-size "3rem"}}]))
+      (take goal-to-win
+            (repeat [:i.far.fa-circle {:style {:color "lightgray"
+                                               :font-size "3rem"}}]))]))
 
 (defn TheGameContainer []
   [:<>
@@ -181,7 +210,7 @@
     [TimeBarContainer]
     [:div.columns.is-centered
      [PastNewsContainer]
-     [:div
+     [:div {:style {:max-width "33%"}}
       [GameButtonsContainer]
       [LivesContainer]
       [GoalsContainer]]

@@ -60,7 +60,7 @@
   []
   (let [game-started? @(rf/subscribe [:game-started?])
         game-ended? @(rf/subscribe [:game-ended?])]
-    [:<>
+    [:div
      (cond
 
        (and (not game-started?) (not game-ended?))
