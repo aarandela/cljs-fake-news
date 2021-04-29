@@ -153,7 +153,12 @@
 (defn NewsTitleContainer []
   (let [title @(rf/subscribe [::news-title])]
     [:div {:style {:max-height "15rem"
-                   :min-height "10rem"}} ;; FIXME: put in css
+                   :min-height "10rem"
+                   :border-style  "solid"
+                   :border-color "#D3D3D3"
+                   :border-width "0.5px"
+                   :padding "1.25rem"
+                   :border-radius "15px"}} ;; FIXME: put in css
      [:h1.subtitle.is-2.has-text-centered
       title]]))
 

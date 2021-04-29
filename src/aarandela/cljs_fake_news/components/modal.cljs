@@ -66,8 +66,9 @@
    [:div.modal (when type
                  {:class "is-active"})
     [:div.modal-background]
-    [:div.modal-content
-      msg]]])
+    [:div.modal-card
+     [:div.modal-card-body
+       [:div.has-text-centered.is-size-1 msg]]]]])
 
 
 (defmethod ModalInternal :default
