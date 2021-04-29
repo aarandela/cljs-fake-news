@@ -57,6 +57,14 @@
          (assoc :news-on-deck news-on-deck)
          (assoc :num-of-questions (count all-news-ids))))))
 
+(def twenty-seconds 20)
+(def eleven-seconds 11)
+(def six-seconds 6)
+(def four-seconds 4)
+
+(def eight-correct-answers 8)
+(def fourteen-correct-answers 14)
+
 (rf/reg-event-db
  ::set-difficulty
  (fn [db [_ difficulty]]
@@ -65,27 +73,28 @@
      (-> db
          (assoc-in [:player-options :start-lives] 8)
          (assoc-in [:player-options :lives-left] 8)
-         (assoc-in [:player-options :time-start] 20)
-         (assoc-in [:player-options :goal-to-win] 8))
+         (assoc-in [:player-options :time-start] twenty-seconds)
+         (assoc-in [:player-options :goal-to-win] eight-correct-answers))
      "medium"
      (-> db
          (assoc-in [:player-options :start-lives] 5)
          (assoc-in [:player-options :lives-left] 5)
-         (assoc-in [:player-options :time-start] 11)
-         (assoc-in [:player-options :goal-to-win] 14))
+         (assoc-in [:player-options :time-start] eleven-seconds)
+         (assoc-in [:player-options :goal-to-win] fourteen-correct-answers))
          
      "hard"
      (-> db
          (assoc-in [:player-options :start-lives] 3)
          (assoc-in [:player-options :lives-left] 3)
-         (assoc-in [:player-options :time-start] 6)
-         (assoc-in [:player-options :goal-to-win] 14))
+         (assoc-in [:player-options :time-start] six-seconds)
+         (assoc-in [:player-options :goal-to-win] fourteen-correct-answers))
      "hardcore"
      (-> db
          (assoc-in [:player-options :start-lives] 1)
          (assoc-in [:player-options :lives-left] 1)
-         (assoc-in [:player-options :time-start] 4)
-         (assoc-in [:player-options :goal-to-win] 14)))))
+         (assoc-in [:player-options :time-start] four-seconds)
+         (assoc-in [:player-options :goal-to-win] fourteen-correct-answers))
+     (assoc db :player-options nil))))
          
 
 ;; -----------------------------------------------------------------------------
@@ -99,29 +108,51 @@
 ;; -----------------------------------------------------------------------------
 ;; Views
 
-;; Game modes? easy medium hard // time and lives
-;; fetch page gifs? also data for game in the background
-
-(defn GameModes
-  []
-  [:div
-   [:label "Choose Difficulty"]
-   [:select {:on-change #(rf/dispatch [::set-difficulty (-> % .-target .-value)])}
-    [:option {:value ""} "-- Select a Difficulty --"]
-    [:option {:value "easy"} "Easy"]
-    [:option {:value "medium"} "medium"]
-    [:option {:value "hard"} "hard"]
-    [:option {:value "hardcore"} "hardcore"]]])
-
 (defn StartGameButton
   []
   (let [player-options @(rf/subscribe [:player-options])]
-    [:button.button.is-info {:disabled (when-not player-options
-                                         true)
-                             :on-click #(rf/dispatch [:fetch-all-news])}
-     "Start Game"]))
+     [:<>
+      [:button.button.is-info {:disabled (when-not player-options
+                                           true)
+                               :on-click #(rf/dispatch [:fetch-all-news])}
+        "Start Game"]]))
+
+(defn GameModes
+  []
+  (let [player-options @(rf/subscribe [:player-options])]
+    [:<>
+     [:div {:style {:padding "1rem"}}
+      [:select {:on-change #(rf/dispatch [::set-difficulty (-> % .-target .-value)])
+                :style {:padding "rem"}}
+       [:option {:value ""} "-- Select a Difficulty --"]
+       [:option {:value "easy"} "👍 Easy 👍"]
+       [:option {:value "medium"} "👌 Medium 👌"]
+       [:option {:value "hard"} "🔥 Hard 🔥"]
+       [:option {:value "hardcore"} "💯💯 Hardcore 💯💯"]]]
+     (when player-options
+       [:div {:style {:padding "1rem"}} 
+        [:p "You will start with: " [:strong (:start-lives player-options) " lives"]]
+        [:p "And each question, you will only have: " [:strong (:time-start player-options) " seconds"]]
+        [:p "To win, you must answer " [:strong (:goal-to-win player-options)] " correctly."]])
+     [:div {:style {:padding "1rem"}} 
+      [StartGameButton]]]))
+  
+(defn GameTitle 
+  []
+  [:h1.title.is-size-1 "Fake News Game"])
+
+(defn GameDescription
+  []
+  [:div
+   [:h1.subtitle.has-text-weight-medium
+    "Guessing game to see which news headline is real or fake!"]
+   [:h1.subtitle.has-text-weight-medium
+    "Are you able to spot the differences? How many can you get correct?"]
+   [:h1.subtitle.has-text-weight-medium
+    "Select a difficulty below to start playing!"]])
 
 (defn StartOfGameContainer []
   [:section.section
-   [GameModes]
-   [StartGameButton]])
+   [GameTitle]
+   [GameDescription]
+   [GameModes]])
