@@ -55,7 +55,7 @@
                                                        :news-link (:url news-on-deck)
                                                        :thumbnail (:thumbnail news-on-deck)
                                                        :title (:title news-on-deck)
-                                                       :correct? correct-answer?})
+                                                       :correct? correct-answer?}) ;; TODO: add player answer
                         (update :past-question-ids conj (:id news-on-deck))
                         (update :question-num inc))]
      (if correct-answer?

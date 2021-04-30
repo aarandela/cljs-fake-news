@@ -1,7 +1,6 @@
 (ns aarandela.cljs-fake-news.pages.start-of-game
   (:require
    [re-frame.core :as rf]
-   [aarandela.cljs-fake-news.components.game-buttons :refer [GameButtonsContainer]]
    [aarandela.cljs-fake-news.components.example-question :refer [ExampleQuestionContainer]]
    [taoensso.timbre :as timbre]))
 
