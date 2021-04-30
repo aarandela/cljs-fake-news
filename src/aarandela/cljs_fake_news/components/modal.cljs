@@ -67,8 +67,7 @@
                  {:class "is-active"})
     [:div.modal-background]
     [:div.modal-card
-     [:div.modal-card-body
-       [:div.has-text-centered.is-size-1 msg]]]]])
+      [:div.has-text-centered.is-size-1.has-text-white msg]]]])
 
 
 (defmethod ModalInternal :default

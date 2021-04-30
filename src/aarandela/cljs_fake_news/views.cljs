@@ -24,7 +24,7 @@
              :title-question nil
              :game-ended? false
              :game-started? false
-             :time-left 9999
+             :time-left 999999999
              :player-options nil
              :num-correct 0
              :question-num 1
