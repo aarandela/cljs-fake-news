@@ -1,3 +1,6 @@
+# Play here
+https://cljs-fake-news.netlify.app/
+
 # cljs-fake-news
 
 A [re-frame](https://github.com/day8/re-frame) application based on an [old project](https://github.com/aarandela/fake-news/tree/deploy) when I first started out. [Play the old version](https://aarandela.github.io/fake-news/)
