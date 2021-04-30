@@ -5,16 +5,7 @@
    [re-frame.core :as rf]))
 
 (rf/reg-fx
- :fetch-onion
- (fn [{:keys [url method success-action error-action]}]
-   (ajax/call-api
-    url
-    method
-    #(rf/dispatch (conj success-action %))
-    #(rf/dispatch (conj error-action %)))))
-
-(rf/reg-fx
- :fetch-not-the-onion
+ :call-api
  (fn [{:keys [url method success-action error-action]}]
    (ajax/call-api
     url

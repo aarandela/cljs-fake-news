@@ -1,6 +1,8 @@
 (ns aarandela.cljs-fake-news.pages.start-of-game
   (:require
    [re-frame.core :as rf]
+   [aarandela.cljs-fake-news.components.game-buttons :refer [GameButtonsContainer]]
+   [aarandela.cljs-fake-news.components.example-question :refer [ExampleQuestionContainer]]
    [taoensso.timbre :as timbre]))
 
 
@@ -12,27 +14,31 @@
  (fn [{:keys [db]} _]
    {:db (assoc db :modal {:type "GET_READY"
                           :msg "Get Ready! Loading news..."})
-    :fx [[:fetch-onion {:url "https://www.reddit.com/r/TheOnion/.json?limit=100"
-                        :method :get
-                        :success-action [::fetch-success]
-                        :error-action [::fetch-failure]}]]})) 
+    :fx [[:call-api {:url "https://www.reddit.com/r/TheOnion/.json?limit=100"
+                     :method :get
+                     :success-action [::fetch-fake-news-success]
+                     :error-action [::fetch-failure]}]
+         [:call-api {:url "https://www.reddit.com/r/nottheonion/.json?limit=100"
+                     :method :get
+                     :success-action [::fetch-real-news-success]
+                     :error-action [::fetch-failure]}]]})) 
 
 
 (rf/reg-event-fx
- ::fetch-success
+ ::fetch-fake-news-success
  (fn [{:keys [db]} [_ response]]
    (let [fake-news (->> (get-in response [:data :children])
                         (map #(:data %))
                         (filter #(:subreddit %))) ;; possible dirty data where subreddit was nil
-         fake-news (zipmap (map :id fake-news) fake-news)]
+         fake-news (zipmap (map :id fake-news) fake-news)
+         time-start (get-in db [:player-options :time-start])]
      {:db (assoc db :fake-news fake-news)
-      :fetch-not-the-onion {:url "https://www.reddit.com/r/nottheonion/.json?limit=100"
-                            :method :get
-                            :success-action [::fetch-not-onion-success]
-                            :error-action [::fetch-failure]}})))
+      :fx [[:dispatch [:destroy-fetch-modal]]
+           [:dispatch [::start-game]]
+           [:dispatch [:set-and-start-timer time-start]]]})))
 
 (rf/reg-event-fx
- ::fetch-not-onion-success
+ ::fetch-real-news-success
  (fn [{:keys [db]} [_ response]]
    (let [real-news (->> (get-in response [:data :children])
                         (map #(:data %))
@@ -47,15 +53,16 @@
 (rf/reg-event-db
  ::start-game
  (fn [db _]
-   (let [combined-news (merge (:fake-news db) (:real-news db))
-         all-news-ids (keys combined-news)
-         news-on-deck (get combined-news (rand-nth all-news-ids))]
-     (-> db
-         (assoc :game-started? true)
-         (assoc :combined-news combined-news)
-         (assoc :game-question-ids all-news-ids)
-         (assoc :news-on-deck news-on-deck)
-         (assoc :num-of-questions (count all-news-ids))))))
+   (when (not (:modal db))
+     (let [combined-news (merge (:fake-news db) (:real-news db))
+           all-news-ids (keys combined-news)
+           news-on-deck (get combined-news (rand-nth all-news-ids))]
+       (-> db
+           (assoc :game-started? true)
+           (assoc :combined-news combined-news)
+           (assoc :game-question-ids all-news-ids)
+           (assoc :news-on-deck news-on-deck)
+           (assoc :num-of-questions (count all-news-ids)))))))
 
 (def twenty-seconds 20)
 (def eleven-seconds 11)
@@ -123,7 +130,6 @@
     [:<>
      [:div {:style {:padding "1rem"}}
       [:select.has-text-centered {:on-change #(rf/dispatch [::set-difficulty (-> % .-target .-value)])}
-                :style {:padding "rem"}
        [:option {:value ""} "-- Select a Difficulty --"]
        [:option {:value "easy"} "👍 Easy 👍"]
        [:option {:value "medium"} "👌 Medium 👌"]
@@ -136,9 +142,7 @@
                                       " life"
                                       " lives")] "!"]
         [:p "You will only have " [:strong (:time-start player-options) " seconds"] " for each question!"]
-        [:p "To win, you must answer " [:strong (:goal-to-win player-options)] " correctly!"]])
-     [:div {:style {:padding "1rem"}} 
-      [StartGameButton]]]))
+        [:p "To win, you must answer " [:strong (:goal-to-win player-options)] " correctly!"]])]))
   
 (defn GameTitle 
   []
@@ -150,12 +154,19 @@
    [:h1.subtitle.has-text-weight-medium
     "Guessing game to see which news headline is real or fake!"]
    [:h1.subtitle.has-text-weight-medium
-    "Are you able to spot the differences? How many can you get correct?"]
+    "Are you able to spot the difference? How many can you get correct?"]
+   [ExampleQuestionContainer]
    [:h1.subtitle.has-text-weight-medium
-    "Select a difficulty below to start playing!"]])
+     "Select a difficulty below to start playing!"]
+   [:p.has-text-weight-light
+     "This uses a Reddit API, if you have it blocked, the game wont work."]
+   [:p.has-text-weight-light
+     "If you're able to see the example question above, start playing!"]])
 
 (defn StartOfGameContainer []
   [:section.section
    [GameTitle]
    [GameDescription]
-   [GameModes]])
+   [GameModes]
+   [:div {:style {:padding "1rem"}}
+    [StartGameButton]]])

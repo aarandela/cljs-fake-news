@@ -13,24 +13,51 @@
 ;; -----------------------------------------------------------------------------
 ;; Events
 
-(rf/reg-event-db
+;; (rf/reg-event-fx
+;;  :global-init
+;;  (fn [db _]
+;;    (assoc db :modal nil
+;;              :fake-news {}
+;;              :real-news {}
+;;              :game-question-ids []
+;;              :past-question-ids #{}
+;;              :title-question nil
+;;              :game-ended? false
+;;              :game-started? false
+;;              :time-left 999999999
+;;              :player-options nil
+;;              :num-correct 0
+;;              :question-num 1
+;;              :past-news-links [])))
+
+(rf/reg-event-fx
  :global-init
- (fn [db _]
-   (assoc db :modal nil
-             :fake-news {}
-             :real-news {}
-             :game-question-ids []
-             :past-question-ids #{}
-             :title-question nil
-             :game-ended? false
-             :game-started? false
-             :time-left 999999999
-             :player-options nil
-             :num-correct 0
-             :question-num 1
-             :past-news-links [])))
+ (fn [{:keys [db]} _]
+   {:db (assoc db :modal nil
+                  :fake-news {}
+                  :real-news {}
+                  :game-question-ids []
+                  :past-question-ids #{}
+                  :title-question nil
+                  :game-ended? false
+                  :game-started? false
+                  :time-left 999999999
+                  :player-options nil
+                  :num-correct 0
+                  :question-num 1
+                  :past-news-links [])
+    :fx [[:call-api {:url "https://www.reddit.com/r/TheOnion+nottheonion/.json?limit=8"
+                     :method :get
+                     :success-action [::fetch-example-success]
+                     :error-action [::fetch-failure]}]]}))
 
-
+(rf/reg-event-fx
+  ::fetch-example-success
+  (fn [{:keys [db]} [_ response]]
+    {:db (assoc db :example-question (->> (get-in response [:data :children])
+                                          (map #(:data %))
+                                          rand-nth))
+     :fx [[:dispatch [:destroy-fetch-modal]]]}))
 
 ;; (rf/reg-event-db
 ;;   ::fetch-failure
@@ -52,6 +79,11 @@
   :game-ended?
   (fn [db _]
     (:game-ended? db)))
+
+(rf/reg-sub
+  :example-question
+  (fn [db _]
+    (:example-question db)))
 
 ;; -----------------------------------------------------------------------------
 ;; Views
