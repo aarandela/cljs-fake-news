@@ -100,15 +100,13 @@ to which you may now connect.
 
 TODO:
 
-- [] Stop timer when game ends
-- [] Clean up UI
+- [ ] Stop timer when game ends
 - [x] Add Past News section
 - [x] lives section
 - [x] show time
-- [] show past news component in end game page
-- [] End game should not refresh, so questions shouldn't be duplicated
-- [] ajax calls concurrent
-- [] fix modal
-- [] goals
-- [] gifs?
-- [] WebRTC?
+- [x] show past news component in end game page
+- [x] ajax calls concurrent
+- [x] fix modal
+- [x] goals
+- [ ] gifs?
+- [ ] WebRTC?
