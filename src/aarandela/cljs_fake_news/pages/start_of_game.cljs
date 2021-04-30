@@ -131,7 +131,10 @@
        [:option {:value "hardcore"} "💯💯 Hardcore 💯💯"]]]
      (when player-options
        [:div {:style {:padding "1rem"}} 
-        [:p "You will start with " [:strong (:start-lives player-options) " lives"] "!"]
+        [:p "You will start with " [:strong (:start-lives player-options) 
+                                    (if (= (:start-lives player-options) 1) 
+                                      " life"
+                                      " lives")] "!"]
         [:p "You will only have " [:strong (:time-start player-options) " seconds"] " for each question!"]
         [:p "To win, you must answer " [:strong (:goal-to-win player-options)] " correctly!"]])
      [:div {:style {:padding "1rem"}} 
