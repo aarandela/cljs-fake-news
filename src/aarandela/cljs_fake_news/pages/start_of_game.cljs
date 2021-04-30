@@ -12,10 +12,10 @@
  (fn [{:keys [db]} _]
    {:db (assoc db :modal {:type "GET_READY"
                           :msg "Get Ready! Loading news..."})
-    :fetch-onion {:url "https://www.reddit.com/r/TheOnion/.json?limit=100"
-                  :method :get
-                  :success-action [::fetch-success]
-                  :error-action [::fetch-failure]}}))
+    :fx [[:fetch-onion {:url "https://www.reddit.com/r/TheOnion/.json?limit=100"
+                        :method :get
+                        :success-action [::fetch-success]
+                        :error-action [::fetch-failure]}]]})) 
 
 
 (rf/reg-event-fx
@@ -122,8 +122,8 @@
   (let [player-options @(rf/subscribe [:player-options])]
     [:<>
      [:div {:style {:padding "1rem"}}
-      [:select {:on-change #(rf/dispatch [::set-difficulty (-> % .-target .-value)])
-                :style {:padding "rem"}}
+      [:select.has-text-centered {:on-change #(rf/dispatch [::set-difficulty (-> % .-target .-value)])}
+                :style {:padding "rem"}
        [:option {:value ""} "-- Select a Difficulty --"]
        [:option {:value "easy"} "👍 Easy 👍"]
        [:option {:value "medium"} "👌 Medium 👌"]
@@ -131,9 +131,9 @@
        [:option {:value "hardcore"} "💯💯 Hardcore 💯💯"]]]
      (when player-options
        [:div {:style {:padding "1rem"}} 
-        [:p "You will start with: " [:strong (:start-lives player-options) " lives"]]
-        [:p "And each question, you will only have: " [:strong (:time-start player-options) " seconds"]]
-        [:p "To win, you must answer " [:strong (:goal-to-win player-options)] " correctly."]])
+        [:p "You will start with " [:strong (:start-lives player-options) " lives"] "!"]
+        [:p "You will only have " [:strong (:time-start player-options) " seconds"] " for each question!"]
+        [:p "To win, you must answer " [:strong (:goal-to-win player-options)] " correctly!"]])
      [:div {:style {:padding "1rem"}} 
       [StartGameButton]]]))
   

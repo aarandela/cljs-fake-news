@@ -41,10 +41,12 @@
       (map-indexed #(PastNewsRow %1 %2) news-links)]]))
 
 (defn PastNewsContainer []
-  [:div.column {:style {:border-style  "solid" 
-                        :border-color "#D3D3D3"
-                        :border-width  "0.5px"
-                        :padding       "1.25rem"
-                        :border-radius "15px"}}
-    [:h1.subtitle.has-text-centered.is-size-2 "Past News"]
-    [PastNewsTable]])
+  (let [news-links @(rf/subscribe [:past-news-links])]
+    [:div.column {:style {:border-style  "solid"
+                          :border-color "#D3D3D3"
+                          :border-width  "0.5px"
+                          :padding       "1.25rem"
+                          :border-radius "15px"}}
+     (when (seq news-links)
+       [:h1.subtitle.has-text-centered.is-size-3 "Past News"]
+       [PastNewsTable])]))

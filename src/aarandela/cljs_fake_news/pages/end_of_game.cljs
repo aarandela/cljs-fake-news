@@ -17,11 +17,26 @@
 ;;             (assoc :game-ended? false)
 ;;             (assoc :game-question-ids []))}))
 
+;; (rf/reg-event-fx
+;;  ::fetch-giphy
+;;  (fn [{:keys [db]} [_ _]]
+;;    {:db (-> db
+;;             (assoc :game-started? false)
+;;             (assoc :game-ended? false)
+;;             (assoc :game-question-ids []))
+;;     :fx [[:call-api {:url ""
+;;                      :method :get
+;;                      :success-action [::fetch-success]
+;;                      :error-action [::fetch-failure]}]]}))
+
 
 ;; -----------------------------------------------------------------------------
 ;; Subscriptions
 
-
+(rf/reg-sub
+ :winner?
+ (fn [db]
+   (:winner? db)))
 
 ;; -----------------------------------------------------------------------------
 ;; Views
@@ -29,12 +44,19 @@
 
 (defn RestartGameButton
   []
-  [:button.button.is-success {:on-click #((-> js/document
-                                              (. -location)
-                                              (. (reload))))} ;; FIXME: dont refresh
-   "Restart Game"])
+  [:div {:style {:padding "1rem"}}
+   [:button.button.is-success.is-large {:on-click #((-> js/document
+                                                        (. -location)
+                                                        (. (reload))))} ;; FIXME: dont refresh
+     "Restart Game"]])
 
 (defn EndOfGameContainer []
-  [:section.section
-    [RestartGameButton]
-    [PastNewsContainer]])
+  (let [winner? @(rf/subscribe [:winner?])]
+    [:section.section
+     
+     [:div.has-text-centered 
+      [RestartGameButton]]
+     (if winner?
+       [:div.title.is-size-1.has-text-centered "🔥🔥🔥 Good Job! 🔥🔥🔥"]
+       [:div.title.is-size-1.has-text-centered "😂😂😂 Try again 😂😂😂"])
+     [PastNewsContainer]]))
